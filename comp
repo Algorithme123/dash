@@ -1,0 +1,70 @@
+import { Component, OnInit } from '@angular/core';
+import { RoleService } from './role.service';
+import { Role, ModulePermission } from './models/role.model';
+
+@Component({
+  selector: 'app-permission-manager',
+  templateUrl: './permission-manager.component.html'
+})
+export class PermissionManagerComponent implements OnInit {
+  roles: Role[] = [];
+  selectedRole: Role | null = null;
+  modules = ['COMPANY', 'PERSONNEL', 'ZONE', 'TAXE', 'AGENCY']; // Exemple de modules
+
+  successMessage: string | null = null;
+  errorMessage: string | null = null;
+
+  constructor(private roleService: RoleService) {}
+
+  ngOnInit(): void {
+    this.roleService.getRoles().subscribe((data: Role[]) => {
+      this.roles = data;
+    });
+  }
+
+  onRoleChange(roleName: string): void {
+    this.selectedRole = this.roles.find(role => role.name === roleName) || null;
+  }
+
+  isPermissionSelected(module: string, action: string): boolean {
+    const permission = this.selectedRole?.permissions.find(p => p.moduleName === module);
+    return permission ? permission[action.toLowerCase()] : false;
+  }
+
+  onPermissionChange(module: string, action: string, event: any): void {
+    const permission = this.selectedRole?.permissions.find(p => p.moduleName === module);
+    if (permission) {
+      permission[action.toLowerCase()] = event.target.checked;
+    }
+  }
+
+  isAllPermissionsSelected(module: string): boolean {
+    const permission = this.selectedRole?.permissions.find(p => p.moduleName === module);
+    return permission ? permission.view && permission.create && permission.update && permission.delete : false;
+  }
+
+  onAllowAllChange(module: string, event: any): void {
+    const permission = this.selectedRole?.permissions.find(p => p.moduleName === module);
+    if (permission) {
+      permission.view = event.target.checked;
+      permission.create = event.target.checked;
+      permission.update = event.target.checked;
+      permission.delete = event.target.checked;
+    }
+  }
+
+  savePermissions(): void {
+    if (this.selectedRole) {
+      this.roleService.savePermissions(this.selectedRole).subscribe(
+        response => {
+          this.successMessage = 'Permissions saved successfully';
+          this.errorMessage = null;
+        },
+        error => {
+          this.errorMessage = 'An error occurred while saving permissions';
+          this.successMessage = null;
+        }
+      );
+    }
+  }
+}
