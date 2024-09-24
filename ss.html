@@ -1,15 +1,22 @@
-  getRolePermissions(Nurl: string, roleId: string): Observable<any> {
-    const options = {
-      headers: new HttpHeaders({
-        'Access-Control-Allow-Headers': 'Content-Type',
-        'Access-Control-Allow-Methods': 'GET,POST,OPTIONS,DELETE,PUT',
-        'Authorization': `Bearer ${this.userToken}`,
-        'Access-Control-Allow-Origin': '*',
-        'Access-Control-Allow-Credentials': 'true',
-        'Content-Type': 'application/json',
+onRoleChange(role: any) {
+  // Récupérer l'ID du rôle
+  const roleId = role.id;
 
-      }),
+  // Faire un appel API pour récupérer les permissions du rôle à partir de cet ID
+  this.roleService.getRolePermissions('/roles/permissions/', roleId).subscribe({
+    next: (data: any) => {
+      // Une fois les données récupérées, assigner les permissions au rôle sélectionné
+      this.selectedRole = data;
 
+      // Réinitialiser le message de succès
+      this.successMessage = "";
+      
+      // Debug : Afficher les données du rôle récupérées dans la console
+      console.log('Permissions du rôle sélectionné:', this.selectedRole);
+    },
+    error: (error: any) => {
+      // Gérer les erreurs d'appel API ici si besoin
+      console.error('Erreur lors de la récupération des permissions:', error);
     }
-    return this.http.get<any>(`${this.url}${Nurl}${roleId}`, options);
-  }
+  });
+}
