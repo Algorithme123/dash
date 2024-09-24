@@ -1,19 +1,15 @@
-// Méthode pour récupérer les modules à partir du rôle sélectionné
-getModulesFromRole(role: any) {
-  const modulesMap: any = {};
+  getRolePermissions(Nurl: string, roleId: string): Observable<any> {
+    const options = {
+      headers: new HttpHeaders({
+        'Access-Control-Allow-Headers': 'Content-Type',
+        'Access-Control-Allow-Methods': 'GET,POST,OPTIONS,DELETE,PUT',
+        'Authorization': `Bearer ${this.userToken}`,
+        'Access-Control-Allow-Origin': '*',
+        'Access-Control-Allow-Credentials': 'true',
+        'Content-Type': 'application/json',
 
-  // Vérifie que roleAuthorities existe et est un tableau avant d'utiliser forEach
-  if (role && role.roleAuthorities && Array.isArray(role.roleAuthorities)) {
-    role.roleAuthorities.forEach((permission: any) => {
-      const module = permission.tableName;
-      if (!modulesMap[module]) {
-        modulesMap[module] = { name: module, permissions: [] };
-      }
-      modulesMap[module].permissions.push(permission.authorityName);
-    });
-  } else {
-    console.error("roleAuthorities est absent ou n'est pas un tableau valide", role);
+      }),
+
+    }
+    return this.http.get<any>(`${this.url}${Nurl}${roleId}`, options);
   }
-
-  return Object.values(modulesMap);
-}
